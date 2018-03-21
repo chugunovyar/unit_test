@@ -2,29 +2,42 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
 from rest_framework.views import APIView
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.parsers import JSONParser
+from api.models import ClientAnketa, CreditOrg
+from django.core import serializers
+from django.core.exceptions import FieldError
+import json
 
 
 
 class PartnerView(APIView):
     """
-        Возможность просматривать анкеты и заявки.
+        Получение списка анкет, с сортировкой и фильтрами.
     """
-    def get(self, request):
-        pass
-        return JsonResponse({"status":"ok"})
+    def post(self, request):
+        _filter = request.data
+        try:
+            qs = ClientAnketa.objects.filter(**_filter).order_by('id')
+            response_data = serializers.serialize('json', qs)
+        except FieldError:
+            response_data = json.dumps({"status": "не корректный запрос"})
+        return HttpResponse(response_data, content_type='application/json')
 
 
 class CreditOrgView(APIView):
     """
         Просмотр кредитных заявок для кредитных организаций.
     """
-    def get(self, request):
-        pass
-        return JsonResponse({"status":"ok"})
+    def post(self, request):
+        _filter = request.data
+        try:
+            qs = CreditOrg.objects.filter(**_filter).order_by('id')
+            response_data = serializers.serialize('json', qs)
+        except FieldError:
+            response_data = json.dumps({"status": "не корректный запрос"})
+        return HttpResponse(response_data, content_type='application/json')

@@ -12,6 +12,7 @@
 	docker-compose build
 	docker-compose up
 ```
+	Дождаться запуска проекта.
 
 ## Роли 
 
