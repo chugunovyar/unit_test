@@ -12,7 +12,7 @@
 	docker-compose build
 	docker-compose up
 ```
-	Дождаться запуска проекта.
+	Дождаться запуска проекта и перейти на страницу http://localhost:8000
 
 ## Роли 
 
@@ -33,6 +33,7 @@
 	Django admin panel - http://localhost:8000/admin/
 	Flower - панель мониторинга выполнения асинхронных задач http://localhost:5555
 	RabbitMQ - брокер очередей, http://localhost:15672
+	
 ```
 
 #### Примечания.
