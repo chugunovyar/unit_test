@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  web:
+  app:
     build: .
     command: ./init.sh
     volumes:
@@ -16,9 +16,8 @@ services:
         context: .
         dockerfile: Dockerfile
       environment:
-          DATABASE_HOST: $POSTGRES_HOST
-          DATABASE_NAME: $POSTGRES_DB
-          DATABASE_USER: $POSTGRES_USER
+          FLOWER_LOGIN: $FLOWER_LOGIN
+          FLOWER_PASS: $FLOWER_PASS
       command: celery -A asynctasks.celeryconf flower --port=5555 --basic_auth=$FLOWER_LOGIN:$FLOWER_PASS
       volumes:
         - .:/code
@@ -41,28 +40,16 @@ services:
         context: .
         dockerfile: Dockerfile
       environment:
-          DATABASE_HOST: $POSTGRES_HOST
-          DATABASE_NAME: $POSTGRES_DB
-          DATABASE_USER: $POSTGRES_USER
-          DATABASE_PASSWORD: $POSTGRES_PASSWORD
-          DATABASE_PORT: $POSTGRES_PORT
-          RABBIT_PORT: 5672 #$RABBIT_PORT
+          RABBIT_PORT: $RABBIT_PORT
           RABBIT_HOST: $RABBIT_HOST
           RABBIT_USER: $RABBIT_USERNAME
           RABBIT_PASSWORD: $RABBIT_PASSWORD
-          SENTRY_DSN: "$SENTRY_DSN"
-          SENTRY_APP_SERVER: "$SENTRY_APP_SERVER"
-          SENTRY_APP_VERSION: "$DS_VERSION"
-          SENTRY_APP_SERVICE: "app-worker"
-          SIZE_BATCH: $SIZE_BATCH
-      command: celery worker -A asynctasks.celeryconf -Q default -n default@%h --logfile=logs/celery.log --loglevel=info --beat --max-tasks-per-child 1
+      command: celery worker -A asynctasks.celeryconf -Q default -n default@%h --loglevel=info --beat --max-tasks-per-child 1
       volumes:
         - .:/code
       links:
-        #- db
         - rabbit
       depends_on:
-        #- db
         - rabbit
       networks:
         - back

@@ -25,7 +25,7 @@ SECRET_KEY = 'y=0q%-wk$=&q@^e2r#ml&w_a8a2nx*a7rv_ddwx=w1&$h#dkjb'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'asynctasks',
+    'api',
 ]
 
 MIDDLEWARE = [
