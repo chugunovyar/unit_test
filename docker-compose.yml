@@ -1,0 +1,86 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    command: ./init.sh
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+
+
+  # Celery admin panel
+  app-flower:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      environment:
+          DATABASE_HOST: $POSTGRES_HOST
+          DATABASE_NAME: $POSTGRES_DB
+          DATABASE_USER: $POSTGRES_USER
+      command: celery -A asynctasks.celeryconf flower --port=5555 --basic_auth=$FLOWER_LOGIN:$FLOWER_PASS
+      volumes:
+        - .:/code
+      ports:
+        - "5555:5555"
+      links:
+        - rabbit
+      depends_on:
+        - app
+        - app-worker
+        - rabbit
+      networks:
+        - back
+        - front
+
+
+  # Celery worker
+  app-worker:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      environment:
+          DATABASE_HOST: $POSTGRES_HOST
+          DATABASE_NAME: $POSTGRES_DB
+          DATABASE_USER: $POSTGRES_USER
+          DATABASE_PASSWORD: $POSTGRES_PASSWORD
+          DATABASE_PORT: $POSTGRES_PORT
+          RABBIT_PORT: 5672 #$RABBIT_PORT
+          RABBIT_HOST: $RABBIT_HOST
+          RABBIT_USER: $RABBIT_USERNAME
+          RABBIT_PASSWORD: $RABBIT_PASSWORD
+          SENTRY_DSN: "$SENTRY_DSN"
+          SENTRY_APP_SERVER: "$SENTRY_APP_SERVER"
+          SENTRY_APP_VERSION: "$DS_VERSION"
+          SENTRY_APP_SERVICE: "app-worker"
+          SIZE_BATCH: $SIZE_BATCH
+      command: celery worker -A asynctasks.celeryconf -Q default -n default@%h --logfile=logs/celery.log --loglevel=info --beat --max-tasks-per-child 1
+      volumes:
+        - .:/code
+      links:
+        #- db
+        - rabbit
+      depends_on:
+        #- db
+        - rabbit
+      networks:
+        - back
+        - front
+
+  rabbit:
+      hostname: rabbit
+      image: rabbitmq:3.6.6-management
+      environment:
+        - RABBITMQ_DEFAULT_USER=$RABBIT_USERNAME
+        - RABBITMQ_DEFAULT_PASS=$RABBIT_PASSWORD
+      ports:
+        - "5672:5672"  # we forward this port because it's useful for debugging
+        - "15672:15672"  # here, we can access rabbitmq management plugin
+      networks:
+        - back
+        - front
+
+networks:
+    front:
+    back:
