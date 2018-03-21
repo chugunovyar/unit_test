@@ -25,6 +25,10 @@
  	login: FLOWER_LOGIN
  	password: FLOWER_PASS
 
+ 	Пользователь для RabbitMQ:
+ 	login: rabbitmq
+ 	password: rabbitmq
+
 ``` 
  
 ## Основные компоненты используемые в проекте.
@@ -33,7 +37,7 @@
 	Django admin panel - http://localhost:8000/admin/
 	Flower - панель мониторинга выполнения асинхронных задач http://localhost:5555
 	RabbitMQ - брокер очередей, http://localhost:15672
-	
+
 ```
 
 #### Примечания.
