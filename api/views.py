@@ -167,6 +167,7 @@ class CreditOrgView(APIView):
     def post(self, request):
         _filter = request.data
         try:
+            credit_org = CreditOrg.objects.get(username = request.user)
             qs = CreditOrg.objects.filter(**_filter).order_by('id')
             response_data = serializers.serialize('json', qs)
         except FieldError:
