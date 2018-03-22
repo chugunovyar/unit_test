@@ -62,7 +62,7 @@
     { "id": 1 }
 
 
-    http://localhost:8000/api/partners_create_query - создание анкет
+    http://localhost:8000/api/partners_create_anketa - создание анкет
     (POST запрос). Пример:
 
         {
@@ -74,6 +74,11 @@
             "passport_num": "passport_num",
             "score_bal": 34.0
         }
+
+    http://localhost:8000/api/partners_send_anketa/ - Отправка партнером
+    анкеты в кредитную организацию (POST - запрос). Пример:
+
+    { "id": 1 }
 
 
 ```

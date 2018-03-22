@@ -12,7 +12,7 @@ from api.models import ClientAnketa, CreditOrg
 from django.core import serializers
 from django.core.exceptions import FieldError
 import json
-
+from asynctasks.tasks import send_request_credit_org
 
 
 class PartnerView(APIView):
@@ -30,7 +30,7 @@ class PartnerView(APIView):
         return HttpResponse(response_data, content_type='application/json')
 
 
-class PartnerCreateQuery(APIView):
+class PartnerCreateAnketa(APIView):
     """
         создание анкеты
     """
@@ -42,6 +42,31 @@ class PartnerCreateQuery(APIView):
         except Exception as err:
             print(err)
         return JsonResponse({"status":"1"})
+
+
+class PartnerSendAnketa(APIView):
+    """
+        Отправка партнерами анкеты в кредитные организации.
+    """
+    def post(self, request):
+
+        if request.data.get('id'):
+
+            try:
+
+                ClientAnketa.objects.get(id=request.data['id'])
+                send_request_credit_org.delay(anketa=json.dumps({"id": request.data['id']}))
+
+            except ClientAnketa.DoesNotExist:
+
+                response_data = json.dumps({"status": "нет анкеты по указанному фильтру"})
+
+            return HttpResponse(response_data, content_type='application/json')
+
+        else:
+
+            response_data = json.dumps({"status": "не указан id анкеты"})
+            return HttpResponse(response_data, content_type='application/json')
 
 
 class CreditOrgView(APIView):
