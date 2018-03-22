@@ -60,7 +60,7 @@ class ClientAnketa(models.Model):
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
-    birthday = models.DateTimeField()
+    birthday = models.DateField(null=False, blank=False)
     telephone = models.CharField(max_length=14)
     passport_num = models.CharField(max_length=20)
     score_bal = models.FloatField()
