@@ -9,7 +9,7 @@ from rest_framework import permissions
 from rest_framework.authtoken.models import Token
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.parsers import JSONParser
-from api.models import ClientAnketa, CreditOrg
+from api.models import ClientAnketa, CreditOrg, Partner, ZayavkiCreditOrg
 from django.core import serializers
 from django.contrib.auth.models import User
 from django.core.exceptions import FieldError, ObjectDoesNotExist
@@ -81,10 +81,14 @@ class PartnerView(APIView):
     def post(self, request):
         _filter = request.data
         try:
-            qs = ClientAnketa.objects.filter(**_filter).order_by('id')
+            partner = Partner.objects.get(username=request.user)
+            qs = ClientAnketa.objects.filter(
+                partner=partner,
+                **_filter
+            ).order_by('id')
             response_data = serializers.serialize('json', qs)
         except FieldError as err:
-            response_data = json.dumps({"status": "не корректный запрос"})
+            response_data = json.dumps({"status": str(err)})
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
         return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
@@ -111,8 +115,13 @@ class PartnerCreateAnketa(APIView):
 
         _filter = request.data
         try:
-            ClientAnketa(**_filter).save()
+            partner = Partner.objects.get(username=request.user)
+            ClientAnketa(
+                partner=partner,
+                **_filter
+            ).save()
         except Exception as err:
+            print(err)
             response_data = json.dumps({"status": str(err)})
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({"status":"created"}, status=status.HTTP_201_CREATED)

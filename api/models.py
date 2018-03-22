@@ -1,17 +1,22 @@
 # -- coding: utf-8 -*-
 from django.db import models
+from django.contrib.auth.models import User
 
 class CreditOrg(models.Model):
     """
         Кредитные организации.
     """
     name = models.CharField(max_length=254)
+    username = models.ForeignKey(User)
     
     class Meta:
         verbose_name='Кредитные организации'
 
+    def __str__(self):
+        return '%s' % (self.name)
+
     def __unicode__(self):
-        return self.name
+        return  '%s' % (self.name)
     
     
 class Partner(models.Model):
@@ -19,10 +24,17 @@ class Partner(models.Model):
         Партнеры
     """
     name = models.CharField(max_length=254)
+    username = models.ForeignKey(User)
 
     class Meta:
         verbose_name='Партнеры'
-    
+
+    def __str__(self):
+        return '%s' % (self.name)
+
+    def __unicode__(self):
+        return  '%s' % (self.name)
+
 
 class ClientAnketa(models.Model):
     """
@@ -43,8 +55,12 @@ class ClientAnketa(models.Model):
     class Meta:
         verbose_name='Анкета клиента'
 
+    def __str__(self):
+        return '%s' % (self.passport_num)
+
     def __unicode__(self):
-        self.passport_num
+        return  '%s' % (self.passport_num)
+
 
 class Predlogenie(models.Model):
     """
@@ -70,8 +86,11 @@ class Predlogenie(models.Model):
     class Meta:
         verbose_name='Предложения'
 
+    def __str__(self):
+        return '%s' % (self.name)
+
     def __unicode__(self):
-        return self.name
+        return  '%s' % (self.name)
     
 
 class ZayavkiCreditOrg(models.Model):

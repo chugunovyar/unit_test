@@ -76,7 +76,18 @@ class ClientAnketaAdmin(admin.ModelAdmin):
     score_bal = models.FloatField()
 
     """
-    list_display = ('create_dt', 'update_dt', 'name', 'surname', 'lastname', 'birthday', 'telephone', 'passport_num', 'score_bal')
+    list_display = (
+        'create_dt',
+        'update_dt',
+        'name',
+        'surname',
+        'lastname',
+        'birthday',
+        'telephone',
+        'passport_num',
+        'score_bal',
+        'partner',
+    )
     readonly_fields = ()
     fields = ()
     raw_id_fields = ()
