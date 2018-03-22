@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from django.contrib.auth import authenticate, login
@@ -17,37 +18,70 @@ from asynctasks.tasks import send_request_credit_org
 
 class PartnerView(APIView):
     """
-        Получение списка анкет, с сортировкой и фильтрами.
+        Получение списка анкет, с сортировкой и фильтрами.Фильрация может происходить по любому из полей. Пример фильтра:
+           {
+            "name": "test",
+            "surname": "test",
+            "lastname": "test",
+            "birthday": "2018-03-21",
+            "telephone": "89168094164",
+            "passport_num": "kjahsd2384y32894",
+            "score_bal": 34.0
+          }
         Просмотр анкеты по id
     """
+
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         _filter = request.data
         try:
             qs = ClientAnketa.objects.filter(**_filter).order_by('id')
             response_data = serializers.serialize('json', qs)
-        except FieldError:
+        except FieldError as err:
             response_data = json.dumps({"status": "не корректный запрос"})
-        return HttpResponse(response_data, content_type='application/json')
+            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
 
 class PartnerCreateAnketa(APIView):
     """
-        создание анкеты
+        Создание анкеты происходит при помощи отправки POST запроса в формате json.
+        Пример запроса:
+        {
+            "name": "Сидор",
+            "surname": "Петрович",
+            "lastname": "Иванов",
+            "birthday": "2018-03-21",
+            "telephone": "89168094164",
+            "passport_num": "kjahsd2384y32894",
+            "score_bal": 34.0
+        }
     """
+
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (AllowAny,)
+
     def post(self, request):
 
         _filter = request.data
         try:
             ClientAnketa(**_filter).save()
         except Exception as err:
-            print(err)
-        return JsonResponse({"status":"1"})
+            response_data = json.dumps({"status": str(err)})
+            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"status":"created"}, status=status.HTTP_201_CREATED)
 
 
 class PartnerSendAnketa(APIView):
     """
         Отправка партнерами анкеты в кредитные организации.
     """
+
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (AllowAny,)
+
     def post(self, request):
 
         if request.data.get('id'):
@@ -56,17 +90,18 @@ class PartnerSendAnketa(APIView):
 
                 ClientAnketa.objects.get(id=request.data['id'])
                 send_request_credit_org.delay(anketa=json.dumps({"id": request.data['id']}))
+                response_data = json.dumps({"status": "Заявка отправлена на рассмотрение"})
+                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
             except ClientAnketa.DoesNotExist:
 
                 response_data = json.dumps({"status": "нет анкеты по указанному фильтру"})
-
-            return HttpResponse(response_data, content_type='application/json')
+                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
         else:
 
             response_data = json.dumps({"status": "не указан id анкеты"})
-            return HttpResponse(response_data, content_type='application/json')
+            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreditOrgView(APIView):

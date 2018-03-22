@@ -62,7 +62,8 @@ class ClientAnketa(models.Model):
     lastname = models.CharField(max_length=100)
     birthday = models.DateField(null=False, blank=False)
     telephone = models.CharField(max_length=14)
-    passport_num = models.CharField(max_length=20)
+    # предпологаю что номер паспорта уникален в стране :)
+    passport_num = models.CharField(max_length=20, unique=True)
     score_bal = models.FloatField()
 
     class Meta:

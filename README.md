@@ -62,7 +62,7 @@
     { "id": 1 }
 
 
-    http://localhost:8000/api/partners_create_anketa - создание анкет
+    http://localhost:8000/api/partners_create_anketa/ - создание анкет
     (POST запрос). Пример:
 
         {
