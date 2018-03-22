@@ -49,7 +49,7 @@ class GroupCreditPermisions(permissions.BasePermission):
             return True
 
         elif request.user.is_authenticated():
-            # Проверяем если пользователь в группе partner_group
+            # Проверяем если пользователь в группе credit_group
             try:
                 request.user.groups.get(name="credit_group")
                 return True
@@ -140,10 +140,9 @@ class PartnerSendAnketa(APIView):
         if request.data.get('id'):
 
             try:
-
-                ClientAnketa.objects.get(id=request.data['id'])
+                partner = Partner.objects.get(username=request.user)
+                ClientAnketa.objects.get(partner=partner, id=request.data['id'])
                 send_request_credit_org.delay(anketa=json.dumps({"id": request.data['id']}))
-                #send_request_credit_org.delay(anketa=anketa)
                 response_data = json.dumps({"status": "Заявка отправлена на рассмотрение"})
                 return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
