@@ -15,6 +15,7 @@ def send_request_credit_org(anketa=None):
     :return:
     """
     if anketa != None:
+        # TODO формирование запроса на отправку анкеты кредитору.
         pass
     else:
         pass

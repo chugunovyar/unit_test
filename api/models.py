@@ -24,17 +24,39 @@ class Partner(models.Model):
         verbose_name='Партнеры'
     
 
+class ClientAnketa(models.Model):
+    """
+        Модель Анкета клиента.
+    """
+    create_dt = models.DateTimeField(auto_now_add=True)
+    update_dt = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    birthday = models.DateField(null=False, blank=False)
+    telephone = models.CharField(max_length=14)
+    # предпологаю что номер паспорта уникален в стране :)
+    passport_num = models.CharField(max_length=20, unique=True)
+    score_bal = models.FloatField()
+    partner = models.ForeignKey(Partner)
+
+    class Meta:
+        verbose_name='Анкета клиента'
+
+    def __unicode__(self):
+        self.passport_num
+
 class Predlogenie(models.Model):
     """
         Предложение.
     """
-    
+
     TYPE_OF = (
         ('P','Потребительский'),
         ('I','Ипотека'),
         ('A','Автокредит'),
     )
-    
+
     create_dt = models.DateTimeField(auto_now_add=True)
     update_dt = models.DateTimeField(auto_now=True)
     start_rotate = models.DateTimeField()
@@ -50,27 +72,6 @@ class Predlogenie(models.Model):
 
     def __unicode__(self):
         return self.name
-
-class ClientAnketa(models.Model):
-    """
-        Модель Анкета клиента.
-    """
-    create_dt = models.DateTimeField(auto_now_add=True)
-    update_dt = models.DateTimeField(auto_now=True)
-    name = models.CharField(max_length=100)
-    surname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    birthday = models.DateField(null=False, blank=False)
-    telephone = models.CharField(max_length=14)
-    # предпологаю что номер паспорта уникален в стране :)
-    passport_num = models.CharField(max_length=20, unique=True)
-    score_bal = models.FloatField()
-
-    class Meta:
-        verbose_name='Анкета клиента'
-
-    def __unicode__(self):
-        self.passport_num
     
 
 class ZayavkiCreditOrg(models.Model):
@@ -90,6 +91,7 @@ class ZayavkiCreditOrg(models.Model):
     create_dt = models.DateTimeField(auto_now_add=True)
     send_dt = models.DateTimeField(auto_now=True)
     client_anketa = models.ForeignKey(ClientAnketa)
+    predlogenie = models.ForeignKey(Predlogenie)
     status = models.CharField(choices=STATUSES, max_length=10)
 
     class Meta:
