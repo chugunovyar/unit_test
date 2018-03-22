@@ -45,13 +45,13 @@
 ```text
 
     http://localhost:8000/api/partners_view/ - просмотр существуюших
-    анкет с сортировкой и фильтрами. Пример:
+    анкет с сортировкой и фильтрами (POST запрос). Пример:
 
         {
             "name": "Владимир",
             "surname": "Владимирович",
             "lastname": "Путин",
-            "birthday": "2018-03-21T13:35:54Z",
+            "birthday": "2018-03-21",
             "telephone": "89201271212",
             "passport_num": "passport_num",
             "score_bal": 34.0
@@ -60,6 +60,21 @@
     Просмотр анкет по id. Пример:
 
     { "id": 1 }
+
+
+    http://localhost:8000/api/partners_create_query - создание анкет
+    (POST запрос). Пример:
+
+        {
+            "name": "Владимир",
+            "surname": "Владимирович",
+            "lastname": "Путин",
+            "birthday": "2018-03-21",
+            "telephone": "89201271212",
+            "passport_num": "passport_num",
+            "score_bal": 34.0
+        }
+
 
 ```
 
