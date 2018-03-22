@@ -18,6 +18,7 @@ import json
 class PartnerView(APIView):
     """
         Получение списка анкет, с сортировкой и фильтрами.
+        Просмотр анкеты по id
     """
     def post(self, request):
         _filter = request.data
@@ -27,6 +28,20 @@ class PartnerView(APIView):
         except FieldError:
             response_data = json.dumps({"status": "не корректный запрос"})
         return HttpResponse(response_data, content_type='application/json')
+
+
+class PartnerCreateQuery(APIView):
+    """
+        создание анкеты
+    """
+    def post(self, request):
+
+        _filter = request.data
+        try:
+            ClientAnketa(**_filter).save()
+        except Exception as err:
+            print(err)
+        return JsonResponse({"status":"1"})
 
 
 class CreditOrgView(APIView):
