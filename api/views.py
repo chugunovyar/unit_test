@@ -121,7 +121,6 @@ class PartnerCreateAnketa(APIView):
                 **_filter
             ).save()
         except Exception as err:
-            print(err)
             response_data = json.dumps({"status": str(err)})
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({"status":"created"}, status=status.HTTP_201_CREATED)

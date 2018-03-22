@@ -31,11 +31,20 @@
  	password: rabbitmq
 
  	Учетная запись для партнера:
- 	login: partner
+ 	login: partner_user
+ 	password: Qwerty123
+
+ 	Учетная запись для партнера:
+ 	login: partner_user2
+ 	password: Qwerty123
+
+
+ 	Учетная запись для кредитной организации:
+ 	login: credit_user
  	password: Qwerty123
 
  	Учетная запись для кредитной организации:
- 	login: credit_org
+ 	login: credit_user2
  	password: Qwerty123
 
 ``` 
@@ -106,5 +115,11 @@
      Формат обмена информацией во всех запросах json.
      Заголовки для всех запросов:
      Content-type: application/json
+
+     Выгрузка фикстур:
+     python manage.py dumpdata --settings=unit_test.settings > fixtures/fixtures.json
+
+     Загрузка фикстур (Просходит в автоматическом режиме):
+     python manage.py loaddata fixtures/fixtures.json
 
  ```
