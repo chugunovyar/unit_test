@@ -126,6 +126,28 @@ class PartnerCreateAnketa(APIView):
         return JsonResponse({"status":"created"}, status=status.HTTP_201_CREATED)
 
 
+# class PartnerViewZayavka(APIView):
+#     """
+#         Просмотр заявок для партнера
+#     """
+#     authentication_classes = (TokenAuthentication, )
+#     permission_classes = (IsAuthenticated, GroupPartnerPermisions)
+#
+#     def post(self, request):
+#         _filter = request.data
+#         try:
+#             partner = Partner.objects.get(username=request.user)
+#             qs = ZayavkiCreditOrg.objects.filter(
+#                 partner=partner,
+#                 **_filter
+#             ).order_by('id')
+#             response_data = serializers.serialize('json', qs)
+#         except FieldError as err:
+#             response_data = json.dumps({"status": str(err)})
+#             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+#         return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+
+
 class PartnerSendAnketa(APIView):
     """
         Отправка партнерами анкеты в кредитные организации.
