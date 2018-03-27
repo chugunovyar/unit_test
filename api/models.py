@@ -111,7 +111,7 @@ class ZayavkiCreditOrg(models.Model):
     send_dt = models.DateTimeField(auto_now=True)
     client_anketa = models.ForeignKey(ClientAnketa)
     predlogenie = models.ForeignKey(Predlogenie)
-    status = models.CharField(choices=STATUSES, max_length=10)
+    status = models.CharField(choices=STATUSES, max_length=10, default='NEW')
 
     class Meta:
         verbose_name='Заявки в кредитную организацию'
