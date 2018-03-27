@@ -1,3 +1,13 @@
 from django.test import TestCase
+from django.test import Client
 
-# Create your tests here.
+class TestMainPage(TestCase):
+    """
+        Тестирование главной страницы.
+    """
+
+    def test_main_page(self):
+
+        c = Client()
+        response = c.get('/')
+        self.assertEqual(response.status_code, 200)
