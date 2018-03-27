@@ -57,7 +57,6 @@ class GroupCreditPermisions(permissions.BasePermission):
                 return True
             except ObjectDoesNotExist:
                 return False
-
         else:
             return False
 
@@ -261,7 +260,7 @@ class PartnerCreateZayavka(APIView):
             )
             
             # Формируем заявку на основании предложения.
-            zayavka = ZayavkiCreditOrg.objects.create(
+            ZayavkiCreditOrg.objects.create(
                 client_anketa=_client_anketa,
                 predlogenie=_predlogenie,
                 status='NEW'
@@ -294,12 +293,10 @@ class PartnerViewZayavka(APIView):
         
         except Exception as err:
             response_data = json.dumps({"status": str(err)})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)         
-        
-        
+            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)          
 
 
-class PartnerSendAnketa(APIView):
+class PartnerSendZayavka(APIView):
     """
         Отправка партнерами анкеты в кредитные организации.
     """
@@ -314,7 +311,7 @@ class PartnerSendAnketa(APIView):
             try:
                 partner = Partner.objects.get(username=request.user)
                 ClientAnketa.objects.get(partner=partner, id=request.data['id'])
-                send_request_credit_org.delay(anketa=json.dumps({"id": request.data['id']}))
+                send_request_credit_org.delay(zayavka_id=json.dumps({"id": request.data['id']}))
                 response_data = json.dumps({"status": "Заявка отправлена на рассмотрение"})
                 return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
@@ -350,6 +347,45 @@ class CreditOrgView(APIView):
             response_data = json.dumps({"status": "не корректный запрос"})
         return HttpResponse(response_data, content_type='application/json')
 
+
+class CreditOrgUpdateStatus(APIView):
+    """
+        Предоставление возможности кредитным организациям обновлять статус
+        заявки отправленной только в эту кредитную организацию.
+        Формат:
+            
+            {"id": "6", "status":"ACCEPT"}
+            
+        Варианты статусов:
+        
+            'ACCEPT'
+            'AGREE'
+            'CANCELED'
+            'ISSUED'
+        
+    """
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, GroupCreditPermisions )
+
+    def post(self, request):
+        _filter = request.data
+        try:
+            credit_org = CreditOrg.objects.get(username=request.user)
+            zayavka = ZayavkiCreditOrg.objects.get(
+                id=_filter['id'],
+                #predlogenie__credit_org=credit_org,
+            )
+            zayavka.status = _filter['status']
+            zayavka.save()
+            return JsonResponse({"status": "updated field"}, status=status.HTTP_200_OK)
+        
+        except Exception as err:
+            return JsonResponse({ "status": err }, status=status.HTTP_400_BAD_REQUEST)
+        
+        except ZayavkiCreditOrg.DoesNotExist as err:
+            return JsonResponse({ "status": err },  status=status.HTTP_400_BAD_REQUEST)
+    
 
 class Obtain_auth_token(APIView):
 
