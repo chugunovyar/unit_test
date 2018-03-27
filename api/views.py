@@ -295,11 +295,12 @@ class PartnerViewZayavka(APIView):
                 zayavki = ZayavkiCreditOrg.objects.filter(
                     client_anketa=client_anketa.id
                 )
-                print(zayavki)
-                #qs.append(zayavki)
+                for zayavka in zayavki:
+                    qs.append(zayavka)
                 
             response_data = serializers.serialize('json', qs)
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+        
         except Exception as err:
             response_data = json.dumps({"status": str(err)})
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)         

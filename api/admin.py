@@ -7,8 +7,8 @@ class PartnerAdmin(admin.ModelAdmin):
     """
 
     """
-    list_display = ('name',)
-    readonly_fields = ()
+    list_display = ('id','name','username')
+    readonly_fields = ('id',)
     fields = ()
     raw_id_fields = ()
     list_filter = ()
@@ -22,8 +22,9 @@ class ZayavkiCreditOrgAdmin(admin.ModelAdmin):
         client_anketa = models.ForeignKey(ClientAnketa)
         status = models.CharField(choices=STATUSES, max_length=10)
     """
-    list_display = ('create_dt', 'send_dt', 'client_anketa', 'status')
-    readonly_fields = ()
+    model=ZayavkiCreditOrg
+    list_display = ('id','create_dt', 'send_dt', 'client_anketa', 'status')
+    readonly_fields = ('id',)
     fields = ()
     raw_id_fields = ()
     list_filter = ()
@@ -42,12 +43,13 @@ class PredlogenieAdmin(admin.ModelAdmin):
         max_scoring = models.FloatField()
         credit_org = models.ForeignKey(CreditOrg)
     """
-    list_display = ('create_dt', 'update_dt', 'start_rotate', 'end_rotate', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
-    readonly_fields = ()
+    model=Predlogenie
+    list_display = ('id','create_dt', 'update_dt', 'start_rotate', 'end_rotate', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
+    readonly_fields = ('id',)
     fields = ()
     raw_id_fields = ()
     list_filter = ()
-    search_fields = ()
+    search_fields = ('name', 'type_of', 'min_scoring', 'max_scoring',)
 
 
 class CreditOrgAdmin(admin.ModelAdmin):
@@ -92,7 +94,8 @@ class ClientAnketaAdmin(admin.ModelAdmin):
     fields = ()
     raw_id_fields = ()
     list_filter = ()
-    search_fields = ()
+    search_fields = ('create_dt', 'update_dt', 'name', 'surname', 'lastname', 'birthday', 'telephone', 'passport_num',
+        'score_bal')
 
 
 admin.site.register(Partner, PartnerAdmin)
