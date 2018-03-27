@@ -276,27 +276,18 @@ class PartnerCreateZayavka(APIView):
 
 class PartnerViewZayavka(APIView):
     """
-        Возможность просмотра заявок для партнера.
+        Возможность просмотра заявок для партнера. С фильтрами и сортировкой.
     """
     authentication_classes = (TokenAuthentication, )
     permission_classes = (IsAuthenticated, GroupPartnerPermisions)
     def post(self, request):
         _filter = request.data
-        qs = []
         try:
             partner = Partner.objects.get(username=request.user)
-            clients_ankets = ClientAnketa.objects.filter(
-                partner=partner,
-            )
-            
-            print(clients_ankets)
-            for client_anketa in clients_ankets:
-
-                zayavki = ZayavkiCreditOrg.objects.filter(
-                    client_anketa=client_anketa.id
-                )
-                for zayavka in zayavki:
-                    qs.append(zayavka)
+            qs = ZayavkiCreditOrg.objects.filter(
+                client_anketa__partner=partner,
+                **_filter
+            ).order_by('id')
                 
             response_data = serializers.serialize('json', qs)
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
@@ -308,34 +299,34 @@ class PartnerViewZayavka(APIView):
         
 
 
-# class PartnerSendAnketa(APIView):
-#     """
-#         Отправка партнерами анкеты в кредитные организации.
-#     """
-# 
-#     authentication_classes = (TokenAuthentication, )
-#     permission_classes = (IsAuthenticated, GroupPartnerPermisions)
-# 
-#     def post(self, request):
-# 
-#         if request.data.get('id'):
-# 
-#             try:
-#                 partner = Partner.objects.get(username=request.user)
-#                 ClientAnketa.objects.get(partner=partner, id=request.data['id'])
-#                 send_request_credit_org.delay(anketa=json.dumps({"id": request.data['id']}))
-#                 response_data = json.dumps({"status": "Заявка отправлена на рассмотрение"})
-#                 return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
-# 
-#             except ClientAnketa.DoesNotExist:
-# 
-#                 response_data = json.dumps({"status": "нет анкеты с указанным id"})
-#                 return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
-# 
-#         else:
-# 
-#             response_data = json.dumps({"status": "не указан id анкеты"})
-#             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+class PartnerSendAnketa(APIView):
+    """
+        Отправка партнерами анкеты в кредитные организации.
+    """
+
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, GroupPartnerPermisions)
+
+    def post(self, request):
+
+        if request.data.get('id'):
+
+            try:
+                partner = Partner.objects.get(username=request.user)
+                ClientAnketa.objects.get(partner=partner, id=request.data['id'])
+                send_request_credit_org.delay(anketa=json.dumps({"id": request.data['id']}))
+                response_data = json.dumps({"status": "Заявка отправлена на рассмотрение"})
+                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+
+            except ClientAnketa.DoesNotExist:
+
+                response_data = json.dumps({"status": "нет анкеты с указанным id"})
+                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+
+        else:
+
+            response_data = json.dumps({"status": "не указан id анкеты"})
+            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreditOrgView(APIView):
@@ -349,8 +340,11 @@ class CreditOrgView(APIView):
     def post(self, request):
         _filter = request.data
         try:
-            credit_org = CreditOrg.objects.get(username = request.user)
-            qs = CreditOrg.objects.filter(**_filter).order_by('id')
+            credit_org = CreditOrg.objects.get(username=request.user)
+            # Исключаем все заявки со статусом "NEW" потому что предполагаем что
+            # Сначала партнеры должны их отправить. После этого у заявок меняется статус на
+            # Отправленно "SENDED"
+            qs = ZayavkiCreditOrg.objects.filter(predlogenie__credit_org=credit_org,).exclude(status='NEW')
             response_data = serializers.serialize('json', qs)
         except FieldError:
             response_data = json.dumps({"status": "не корректный запрос"})

@@ -10,8 +10,8 @@ class PartnerAdmin(admin.ModelAdmin):
     list_display = ('id','name','username')
     readonly_fields = ('id',)
     fields = ()
-    raw_id_fields = ()
-    list_filter = ()
+    raw_id_fields = ('username',)
+    list_filter = ('name','username')
     search_fields = ('name',)
 
 
@@ -26,9 +26,9 @@ class ZayavkiCreditOrgAdmin(admin.ModelAdmin):
     list_display = ('id','create_dt', 'send_dt', 'client_anketa', 'status')
     readonly_fields = ('id',)
     fields = ()
-    raw_id_fields = ()
-    list_filter = ()
-    search_fields = ()
+    raw_id_fields = ('client_anketa', 'predlogenie',)
+    list_filter = ('status',)
+    search_fields = ('status',)
 
 
 class PredlogenieAdmin(admin.ModelAdmin):
@@ -45,23 +45,23 @@ class PredlogenieAdmin(admin.ModelAdmin):
     """
     model=Predlogenie
     list_display = ('id','create_dt', 'update_dt', 'start_rotate', 'end_rotate', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
-    readonly_fields = ('id',)
-    fields = ()
-    raw_id_fields = ()
-    list_filter = ()
+    readonly_fields = ('id', 'create_dt', 'update_dt',)
+    fields = ('id', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
+    raw_id_fields = ('credit_org', )
+    list_filter = ('create_dt', 'update_dt', 'start_rotate', 'end_rotate','credit_org',)
     search_fields = ('name', 'type_of', 'min_scoring', 'max_scoring',)
 
 
 class CreditOrgAdmin(admin.ModelAdmin):
     """
-
+        Кастомизация представления в административной панели, модели кредитных организаций.
     """
-    list_display = ('name', )
-    readonly_fields = ()
-    fields = ()
-    raw_id_fields = ()
-    list_filter = ()
-    search_fields = ()
+    list_display = ('id', 'name', 'username' )
+    readonly_fields = ('id',)
+    #fields = ('name',)
+    raw_id_fields = ('username',)
+    list_filter = ('name', 'username')
+    search_fields = ('id','name', 'username')
 
 
 class ClientAnketaAdmin(admin.ModelAdmin):
@@ -79,6 +79,7 @@ class ClientAnketaAdmin(admin.ModelAdmin):
 
     """
     list_display = (
+        'id',
         'create_dt',
         'update_dt',
         'name',
@@ -90,12 +91,12 @@ class ClientAnketaAdmin(admin.ModelAdmin):
         'score_bal',
         'partner',
     )
-    readonly_fields = ()
-    fields = ()
-    raw_id_fields = ()
-    list_filter = ()
-    search_fields = ('create_dt', 'update_dt', 'name', 'surname', 'lastname', 'birthday', 'telephone', 'passport_num',
-        'score_bal')
+    readonly_fields = ('id','create_dt', 'update_dt', )
+    fields = ('id', 'name', 'surname', 'lastname', 'birthday', 'telephone',
+        'passport_num', 'score_bal', 'partner',)
+    raw_id_fields = ('partner',)
+    list_filter = ('create_dt', 'update_dt', 'birthday',)
+    search_fields = ('name', 'surname', 'lastname', 'birthday', 'telephone', 'passport_num', 'score_bal')
 
 
 admin.site.register(Partner, PartnerAdmin)
