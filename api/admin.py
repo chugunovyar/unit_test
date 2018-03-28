@@ -46,7 +46,7 @@ class PredlogenieAdmin(admin.ModelAdmin):
     model=Predlogenie
     list_display = ('id','create_dt', 'update_dt', 'start_rotate', 'end_rotate', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
     readonly_fields = ('id', 'create_dt', 'update_dt',)
-    fields = ('id', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
+    fields = ('id', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org','start_rotate', 'end_rotate')
     raw_id_fields = ('credit_org', )
     list_filter = ('create_dt', 'update_dt', 'start_rotate', 'end_rotate','credit_org',)
     search_fields = ('name', 'type_of', 'min_scoring', 'max_scoring',)

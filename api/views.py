@@ -369,22 +369,31 @@ class CreditOrgUpdateStatus(APIView):
     permission_classes = (IsAuthenticated, GroupCreditPermisions )
 
     def post(self, request):
-        _filter = request.data
-        try:
-            credit_org = CreditOrg.objects.get(username=request.user)
-            zayavka = ZayavkiCreditOrg.objects.get(
-                id=_filter['id'],
-                #predlogenie__credit_org=credit_org,
-            )
-            zayavka.status = _filter['status']
-            zayavka.save()
-            return JsonResponse({"status": "updated field"}, status=status.HTTP_200_OK)
-        
-        except Exception as err:
-            return JsonResponse({ "status": err }, status=status.HTTP_400_BAD_REQUEST)
-        
-        except ZayavkiCreditOrg.DoesNotExist as err:
-            return JsonResponse({ "status": err },  status=status.HTTP_400_BAD_REQUEST)
+        """
+
+        :param request:
+        :return:
+        """
+        if request.data.get('id') and request.data.get('status'):
+            zayavka_id = request.data.get('id')
+            zayavka_status = request.data.get('status')
+            try:
+                credit_org = CreditOrg.objects.get(username=request.user)
+                zayavka = ZayavkiCreditOrg.objects.get(
+                    id=zayavka_id,
+                    predlogenie__credit_org=credit_org,
+                )
+                zayavka.status = zayavka_status
+                zayavka.save()
+                return JsonResponse({"status": "status updated"}, status=status.HTTP_200_OK)
+
+            except Exception as err:
+                return JsonResponse({ "status": str(err) }, status=status.HTTP_400_BAD_REQUEST)
+
+            except ZayavkiCreditOrg.DoesNotExist as err:
+                return JsonResponse({ "status": str(err) },  status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return JsonResponse({"status": "params not presented"}, status=status.HTTP_400_BAD_REQUEST)
     
 
 class Obtain_auth_token(APIView):
