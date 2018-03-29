@@ -310,19 +310,18 @@ class PartnerSendZayavka(APIView):
 
             try:
                 partner = Partner.objects.get(username=request.user)
-                ClientAnketa.objects.get(partner=partner, id=request.data['id'])
-                send_request_credit_org.delay(zayavka_id=json.dumps({"id": request.data['id']}))
-                response_data = json.dumps({"status": "Заявка отправлена на рассмотрение"})
+                ZayavkiCreditOrg.objects.get(client_anketa__partner=partner, id=request.data['id'])
+                task_id = send_request_credit_org.delay(json.dumps({"id": request.data['id']}))
+                response_data = json.dumps({"status": "Zayavka sended"})
                 return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
 
-            except ClientAnketa.DoesNotExist:
-
-                response_data = json.dumps({"status": "нет анкеты с указанным id"})
-                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+            except ZayavkiCreditOrg.DoesNotExist as err:
+                response_data = json.dumps({"status": str(err)})
+                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
         else:
 
-            response_data = json.dumps({"status": "не указан id анкеты"})
+            response_data = json.dumps({"status": "id not presented"})
             return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
 

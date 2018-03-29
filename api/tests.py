@@ -2,10 +2,11 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-from api.views import Obtain_auth_token, PartnerCreateAnketa, PartnerView, PartnerCreateZayavka
+from api.views import Obtain_auth_token, PartnerCreateAnketa, PartnerView, PartnerCreateZayavka, PartnerSendZayavka
 from api.models import Partner, CreditOrg, ClientAnketa, Predlogenie, ZayavkiCreditOrg
 import json
-
+import time
+from celery.result import AsyncResult
 
 class Test_Partner_Api(TestCase):
     """
@@ -293,6 +294,8 @@ class TestPartnersZayavkaAPI(TestCase):
     def test_partners_create_zayavka(self):
         """
             Тестирование создания заявки и предложения.
+            Тестирование отправки заявки в кредитную организацию
+            на рассмотрение заявки.
         :return:
         """
         _zayavka_send = {
@@ -323,6 +326,19 @@ class TestPartnersZayavkaAPI(TestCase):
         client_anketa = ClientAnketa.objects.get(passport_num=_zayavka_send['passport_num'])
         zayavka = ZayavkiCreditOrg.objects.filter(client_anketa=client_anketa)
         self.assertEqual(len(zayavka), 1)
+        ############################################################################
+        #       Отправляем заявку на рассмотрение в кредитную организацию
+        ############################################################################
+        _zayavka_send = {"id": zayavka[0].id }
+        request = self.factory.post('/api/partners_send_zayavka/'
+                                    , json.dumps(_zayavka_send),
+                                    content_type='application/json')
+        force_authenticate(request, user=self.partner_user2, token=self.partner_user_token2)
+        view = PartnerSendZayavka.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        _zayvka_status = json.loads(response.content)
+        self.assertEqual(_zayvka_status['status'],'Zayavka sended')
 
 
     def create_users_and_groups(self):
@@ -581,9 +597,11 @@ class TestCreditOrgAPI(TestCase):
         self.create_users_and_groups()
         self.get_token()
         self.partner_api_create_ankets()
+        self.partners_create_zayavka()
 
     def test_credit_view(self):
         """
+            Тестирование интерфейса создания заявки и отправки в кредитную организацию.
             Тестирование интерфейса просмотра заявок для кредитной организации.
         :return:
         """
@@ -591,7 +609,12 @@ class TestCreditOrgAPI(TestCase):
         print(u)
         c=ClientAnketa.objects.all()
         print(c)
-
+        p = Predlogenie.objects.all()
+        print (p)
+        z = ZayavkiCreditOrg.objects.all()
+        print (z)
+        z = ZayavkiCreditOrg.objects.get(id=1)
+        print (z.status)
 
     def create_users_and_groups(self):
         """
@@ -834,3 +857,44 @@ class TestCreditOrgAPI(TestCase):
         view = PartnerView.as_view()
         response = view(request)
         self.assertEqual(response.status_code, 403)
+
+    def partners_create_zayavka(self):
+        """
+            Тестирование создания заявки и предложения.
+            Тестирование интефейса отправки заявки.
+        :return:
+        """
+        _zayavka_send = {
+                "type_of":"P",
+                "start_rotate":"2018-03-23 20:20:20",
+                "end_rotate":"2018-03-24 20:20:20",
+                "min_scoring":"1.0",
+                "max_scoring":"5.0",
+                "credit_org":self.credit_auth2['username'],
+                "passport_num":"kj234ahs23484y32894"
+            }
+
+        request = self.factory.post('/api/partners_create_zayavka/'
+                                    , json.dumps(_zayavka_send),
+                                    content_type='application/json')
+        force_authenticate(request, user=self.partner_user2, token=self.partner_user_token2)
+        view = PartnerCreateZayavka.as_view()
+        response = view(request)
+        _partner_answer = json.loads(response.content)
+        # Убеждаемся что заявка и предложение созданы.
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(_partner_answer['status'], 'created')
+        creditorg = CreditOrg.objects.get(name=self.credit_auth2['username'])
+        self.assertEqual(
+            len(Predlogenie.objects.filter(credit_org=creditorg)),
+            1
+        )
+        client_anketa = ClientAnketa.objects.get(passport_num=_zayavka_send['passport_num'])
+        zayavka = ZayavkiCreditOrg.objects.filter(client_anketa=client_anketa)
+        self.assertEqual(len(zayavka), 1)
+        self.assertEqual(zayavka[0].status, 'NEW')
+        # Изменяем статус заявки на отправлено.
+        z = ZayavkiCreditOrg.objects.get(**{"id": zayavka[0].id})
+        z.status = 'SENDED'
+        z.save()
+

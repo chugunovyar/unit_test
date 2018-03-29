@@ -44,7 +44,7 @@
 	организации (credit_org), номер и серию паспорта лица подающего заявку (credit_org) 
 	
 	Отправка заявки в кредитную организацию происходит происходит через 
-	(http://localhost:8000/api/partners_send_anketa/):
+	(http://localhost:8000/api/partners_send_zayavka/):
 	 	
 ```
 
@@ -139,15 +139,11 @@
     {"id":"1"}
     
     
-    http://localhost:8000/api/partners_send_anketa/ - Отправка партнером
+    http://localhost:8000/api/partners_send_zayavka/ - Отправка партнером
     анкеты в кредитную организацию (POST - запрос). Пример:
 
     { "id": 1 }
 
-	Вспомогательная консольная комманда позовляющая проверить работу механизма
-	по отправки заявки в кредитную организацию.
-	
-	python manage.py send_zayavka -id <id заявки>
 
 ```
 
