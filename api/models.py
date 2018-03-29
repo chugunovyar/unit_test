@@ -104,7 +104,7 @@ class ZayavkiCreditOrg(models.Model):
         ('ACCEPT','Получена'),
         ('AGREE', 'Одобрена'),
         ('CANCELED', 'Отказано'),
-        ('ISSUED','Выдано'),    
+        ('ISSUED','Выдано'),
     )
     
     create_dt = models.DateTimeField(auto_now_add=True)

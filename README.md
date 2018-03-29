@@ -45,7 +45,20 @@
 	
 	Отправка заявки в кредитную организацию происходит происходит через 
 	(http://localhost:8000/api/partners_send_zayavka/):
-	 	
+
+```
+
+### Кдредитные организации
+```text
+    Кредитные организации имеет доступ к интерфейсу просмотра заявок 
+    направленных в конкретно взятую организацию. (POST-запрос, Content-Type: application/json)
+    http://localhost:8000/api/credit_org/
+    
+    Кредитная организация может обновлять статус у заявок направленных ей.
+    (POST-запрос, Content-Type: application/json)
+    http://localhost:8000/api/creditorg_update_status/
+    Формат запроса:
+    { "id": "1", "status": "ACCEPT"} 
 ```
 
 ## Запуск тестирования проекта.
