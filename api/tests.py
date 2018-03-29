@@ -2,7 +2,8 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory, force_authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-from api.views import Obtain_auth_token, PartnerCreateAnketa, PartnerView, PartnerCreateZayavka, PartnerSendZayavka
+from api.views import Obtain_auth_token, PartnerCreateAnketa, PartnerView, PartnerCreateZayavka, PartnerSendZayavka,\
+    CreditOrgView, CreditOrgUpdateStatus
 from api.models import Partner, CreditOrg, ClientAnketa, Predlogenie, ZayavkiCreditOrg
 import json
 import time
@@ -599,23 +600,6 @@ class TestCreditOrgAPI(TestCase):
         self.partner_api_create_ankets()
         self.partners_create_zayavka()
 
-    def test_credit_view(self):
-        """
-            Тестирование интерфейса создания заявки и отправки в кредитную организацию.
-            Тестирование интерфейса просмотра заявок для кредитной организации.
-        :return:
-        """
-        u = User.objects.all()
-        print(u)
-        c=ClientAnketa.objects.all()
-        print(c)
-        p = Predlogenie.objects.all()
-        print (p)
-        z = ZayavkiCreditOrg.objects.all()
-        print (z)
-        z = ZayavkiCreditOrg.objects.get(id=1)
-        print (z.status)
-
     def create_users_and_groups(self):
         """
             Создание групп и пользователей.
@@ -862,6 +846,8 @@ class TestCreditOrgAPI(TestCase):
         """
             Тестирование создания заявки и предложения.
             Тестирование интефейса отправки заявки.
+            Тестирование интерфейса просмотра заявок для кредитной оргаизации.
+            Тестирование интейфейса обновления статусов для кредитных организаций по заявкам.
         :return:
         """
         _zayavka_send = {
@@ -898,3 +884,56 @@ class TestCreditOrgAPI(TestCase):
         z.status = 'SENDED'
         z.save()
 
+        # Тестирование работы интерфейса для кредитных организаций.
+        request = self.factory.post('/api/credit_org/'
+                                    , json.dumps(_zayavka_send),
+                                    content_type='application/json')
+        force_authenticate(request, user=self.credit_user2, token=self.credit_user_token2)
+        view = CreditOrgView.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        _creditorg_view = json.loads(response.content)
+        self.assertEqual(len(_creditorg_view), 1)
+        self.assertEqual(_creditorg_view[0]['fields']['status'], 'SENDED')
+        # Проверяем что каждая кредитная организация видит только свои заявки.
+        request = self.factory.post('/api/credit_org/'
+                                    , json.dumps(_zayavka_send),
+                                    content_type='application/json')
+        force_authenticate(request, user=self.credit_user, token=self.credit_user_token)
+        view = CreditOrgView.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+        _creditorg_view = json.loads(response.content)
+        self.assertEqual(len(_creditorg_view), 0)
+        ########################################################################
+        #       Тестирование интерфейса обновления статуса для заявки
+        #       в кредитную организацию.
+        ########################################################################
+        _update_status = {
+            "id": "1",
+            "status": "ACCEPT"
+        }
+        request = self.factory.post('/api/creditorg_update_status/'
+                                    , json.dumps(_update_status),
+                                    content_type='application/json')
+        force_authenticate(request, user=self.credit_user2, token=self.credit_user_token2)
+        view = CreditOrgUpdateStatus.as_view()
+        response = view(request)
+        _credit_answer = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(_credit_answer['status'], 'status updated')
+        # Проверяем что кредитная организация может обвнолять статусы только у заявок
+        # которые направлены именно ей.
+        _update_status = {
+            "id": "1",
+            "status": "ACCEPT"
+        }
+        request = self.factory.post('/api/creditorg_update_status/'
+                                    , json.dumps(_update_status),
+                                    content_type='application/json')
+        force_authenticate(request, user=self.credit_user, token=self.credit_user_token)
+        view = CreditOrgUpdateStatus.as_view()
+        response = view(request)
+        _credit_answer = json.loads(response.content)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(_credit_answer['status'], "ZayavkiCreditOrg matching query does not exist.")

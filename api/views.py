@@ -340,7 +340,7 @@ class CreditOrgView(APIView):
             # Исключаем все заявки со статусом "NEW" потому что предполагаем что
             # Сначала партнеры должны их отправить. После этого у заявок меняется статус на
             # Отправленно "SENDED"
-            qs = ZayavkiCreditOrg.objects.filter(predlogenie__credit_org=credit_org,).exclude(status='NEW')
+            qs = ZayavkiCreditOrg.objects.filter(predlogenie__credit_org=credit_org).exclude(status='NEW')
             response_data = serializers.serialize('json', qs)
         except FieldError:
             response_data = json.dumps({"status": "не корректный запрос"})
