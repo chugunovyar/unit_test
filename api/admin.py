@@ -1,17 +1,18 @@
 # -- coding: utf-8 -*-
 from django.contrib import admin
-from api.models import ZayavkiCreditOrg, Partner, Predlogenie, CreditOrg, ClientAnketa
+from api.models import ZayavkiCreditOrg, Partner, Predlogenie,\
+    CreditOrg, ClientAnketa
 
 
 class PartnerAdmin(admin.ModelAdmin):
     """
 
     """
-    list_display = ('id','name','username')
+    list_display = ('id', 'name', 'username')
     readonly_fields = ('id',)
     fields = ()
     raw_id_fields = ('username',)
-    list_filter = ('name','username')
+    list_filter = ('name', 'username')
     search_fields = ('name',)
 
 
@@ -22,8 +23,8 @@ class ZayavkiCreditOrgAdmin(admin.ModelAdmin):
         client_anketa = models.ForeignKey(ClientAnketa)
         status = models.CharField(choices=STATUSES, max_length=10)
     """
-    model=ZayavkiCreditOrg
-    list_display = ('id','create_dt', 'send_dt', 'client_anketa', 'status')
+    model = ZayavkiCreditOrg
+    list_display = ('id', 'create_dt', 'send_dt', 'client_anketa', 'status')
     readonly_fields = ('id',)
     fields = ()
     raw_id_fields = ('client_anketa', 'predlogenie',)
@@ -43,25 +44,29 @@ class PredlogenieAdmin(admin.ModelAdmin):
         max_scoring = models.FloatField()
         credit_org = models.ForeignKey(CreditOrg)
     """
-    model=Predlogenie
-    list_display = ('id','create_dt', 'update_dt', 'start_rotate', 'end_rotate', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org')
+    model = Predlogenie
+    list_display = ('id', 'create_dt', 'update_dt', 'start_rotate',
+                    'end_rotate', 'name', 'type_of', 'min_scoring',
+                    'max_scoring', 'credit_org')
     readonly_fields = ('id', 'create_dt', 'update_dt',)
-    fields = ('id', 'name', 'type_of', 'min_scoring', 'max_scoring', 'credit_org','start_rotate', 'end_rotate')
+    fields = ('id', 'name', 'type_of', 'min_scoring', 'max_scoring',
+              'credit_org', 'start_rotate', 'end_rotate')
     raw_id_fields = ('credit_org', )
-    list_filter = ('create_dt', 'update_dt', 'start_rotate', 'end_rotate','credit_org',)
+    list_filter = ('create_dt', 'update_dt', 'start_rotate',
+                   'end_rotate', 'credit_org',)
     search_fields = ('name', 'type_of', 'min_scoring', 'max_scoring',)
 
 
 class CreditOrgAdmin(admin.ModelAdmin):
     """
-        Кастомизация представления в административной панели, модели кредитных организаций.
+        Кастомизация представления в административной панели,
+         модели кредитных организаций.
     """
-    list_display = ('id', 'name', 'username' )
+    list_display = ('id', 'name', 'username')
     readonly_fields = ('id',)
-    #fields = ('name',)
     raw_id_fields = ('username',)
     list_filter = ('name', 'username')
-    search_fields = ('id','name', 'username')
+    search_fields = ('id', 'name', 'username',)
 
 
 class ClientAnketaAdmin(admin.ModelAdmin):
@@ -91,12 +96,13 @@ class ClientAnketaAdmin(admin.ModelAdmin):
         'score_bal',
         'partner',
     )
-    readonly_fields = ('id','create_dt', 'update_dt', )
-    fields = ('id', 'name', 'surname', 'lastname', 'birthday', 'telephone',
-        'passport_num', 'score_bal', 'partner',)
+    readonly_fields = ('id', 'create_dt', 'update_dt', )
+    fields = ('id', 'name', 'surname', 'lastname', 'birthday',
+              'telephone', 'passport_num', 'score_bal', 'partner',)
     raw_id_fields = ('partner',)
     list_filter = ('create_dt', 'update_dt', 'birthday',)
-    search_fields = ('name', 'surname', 'lastname', 'birthday', 'telephone', 'passport_num', 'score_bal')
+    search_fields = ('name', 'surname', 'lastname', 'birthday',
+                     'telephone', 'passport_num', 'score_bal')
 
 
 admin.site.register(Partner, PartnerAdmin)

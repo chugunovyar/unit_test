@@ -3,13 +3,16 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework.authentication import BasicAuthentication,\
+    TokenAuthentication
 from django.contrib.auth import authenticate, login
 from rest_framework import permissions
 from rest_framework.authtoken.models import Token
-from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from rest_framework.renderers import JSONRenderer,\
+    BrowsableAPIRenderer
 from rest_framework.parsers import JSONParser
-from api.models import ClientAnketa, CreditOrg, Partner, ZayavkiCreditOrg, Predlogenie
+from api.models import ClientAnketa, CreditOrg, Partner,\
+    ZayavkiCreditOrg, Predlogenie
 from django.core import serializers
 from django.contrib.auth.models import User
 from django.core.exceptions import FieldError, ObjectDoesNotExist
@@ -24,10 +27,8 @@ class GroupPartnerPermisions(permissions.BasePermission):
         Проверяем находится ли пользователь в группе partner_group
     """
     def has_permission(self, request, view):
-        
         if request.user.is_authenticated() and request.user.is_superuser:
             return True
-        
         elif request.user.is_authenticated():
             # Проверяем если пользователь в группе partner_group
             try:
@@ -35,7 +36,6 @@ class GroupPartnerPermisions(permissions.BasePermission):
                 return True
             except ObjectDoesNotExist:
                 return False
-            
         else:
             return False
 
@@ -44,7 +44,6 @@ class GroupCreditPermisions(permissions.BasePermission):
     """
         Проверяем находится ли пользователь в группе credit_group
     """
-
     def has_permission(self, request, view):
 
         if request.user.is_authenticated() and request.user.is_superuser:
@@ -63,7 +62,9 @@ class GroupCreditPermisions(permissions.BasePermission):
 
 class PartnerView(APIView):
     """
-        Получение списка анкет, с сортировкой и фильтрами.Фильрация может происходить по любому из полей. Пример фильтра:
+        Получение списка анкет, с сортировкой и фильтрами.
+        Фильрация может происходить по любому из полей.
+        Пример фильтра:
            {
             "name": "test",
             "surname": "test",
@@ -77,7 +78,7 @@ class PartnerView(APIView):
     """
 
     authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAuthenticated,GroupPartnerPermisions)
+    permission_classes = (IsAuthenticated, GroupPartnerPermisions)
 
     def post(self, request):
         _filter = request.data
@@ -90,13 +91,22 @@ class PartnerView(APIView):
             response_data = serializers.serialize('json', qs)
         except FieldError as err:
             response_data = json.dumps({"status": str(err)})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return HttpResponse(
+            response_data,
+            content_type='application/json',
+            status=status.HTTP_200_OK
+        )
 
 
 class PartnerCreateAnketa(APIView):
     """
-        Создание анкеты происходит при помощи отправки POST запроса в формате json.
+        Создание анкеты происходит при помощи
+        отправки POST запроса в формате json.
         Пример запроса:
         {
             "name": "Сидор",
@@ -123,14 +133,22 @@ class PartnerCreateAnketa(APIView):
             ).save()
         except Exception as err:
             response_data = json.dumps({"status": str(err)})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        return JsonResponse({"status":"created"}, status=status.HTTP_201_CREATED)
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return JsonResponse(
+            {"status": "created"},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class PartnerViewCreditOrgs(APIView):
     """
-        Возможность для партнеров просмотра кредитных организаций, 
-        чтобы партнеры знали о перечне организаций, которым можно отправить
+        Возможность для партнеров просмотра кредитных
+         организаций, чтобы партнеры знали о перечне
+        организаций, которым можно отправить
         заявку на рассмотрение.
         С сортировкой и фильтрацией.
     """
@@ -151,21 +169,29 @@ class PartnerViewCreditOrgs(APIView):
             response_data = serializers.serialize('json', qs)
         except FieldError as err:
             response_data = json.dumps({"status": str(err)})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return HttpResponse(
+            response_data,
+            content_type='application/json',
+            status=status.HTTP_200_OK
+        )
 
 
 class PartnerCreateZayavka(APIView):
     """
-        Предоставление API интерфейса для партнеров по созданию заявки 
-        в кредитную организацию.
-        Для создания заявки партнер должен знать id анкеты,  name кредитной организации и
-        тип кредита type_of в которую собирается отправить заявку на рассмотрение.
+        Предоставление API интерфейса для партнеров по
+         созданию заявки в кредитную организацию.
+        Для создания заявки партнер должен знать id анкеты,
+        name кредитной организации и тип кредита type_of в
+        которую собирается отправить заявку на рассмотрение.
         Тип кредита может быть нескольких типов:
             'P' = 'Потребительский'
             'I' = 'Ипотека'
             'A' = 'Автокредит'
-        
         Формат запроса по созданию заявки:
             {
                 "type_of":"P",
@@ -178,10 +204,9 @@ class PartnerCreateZayavka(APIView):
             }
     """
     authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAuthenticated, GroupPartnerPermisions) 
-    
+    permission_classes = (IsAuthenticated, GroupPartnerPermisions,)
+
     def post(self, request):
-        
         _data = request.data
         partner = Partner.objects.get(username=request.user)
         # Определяем тип кредита.
@@ -189,88 +214,139 @@ class PartnerCreateZayavka(APIView):
             type_of = _data['type_of']
         except Exception as err:
             response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # По номеру паспорта находим анкету тк он уникален.
         try:
             passport_num = _data['passport_num']
-            
             _client_anketa = ClientAnketa.objects.get(
                 partner=partner,
                 passport_num=passport_num
             )
         except ClientAnketa.DoesNotExist:
-            response_data = json.dumps({"status":'There is no Client Ankent with this passport num for this partner'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        
+            err_answer = 'There is no Client Ankent ' \
+                         'with this passport num for this partner'
+            response_data = json.dumps(
+                {"status": err_answer}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as err:
-            response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-
+            response_data = json.dumps(
+                {"status": str(err) + ' not correct'}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Находим кредитную организацию для которой формируется заявка.
         try:
             credit_org = CreditOrg.objects.get(name=_data['credit_org'])
-        except CreditOrg.DoesNotExist:    
-            response_data = json.dumps({"status":'There is no Credit org with this name'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        
+        except CreditOrg.DoesNotExist:
+            response_data = json.dumps(
+                {"status": 'There is no Credit org with this name'}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as err:
-            response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-            
+            response_data = json.dumps(
+                {"status": str(err) + ' not correct'}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Определяем дату начала ротации
         try:
-            start_rotate = datetime.datetime.strptime(_data['start_rotate'], "%Y-%m-%d %H:%M:%S")
+            start_rotate = datetime.datetime.strptime(
+                _data['start_rotate'], "%Y-%m-%d %H:%M:%S"
+            )
         except Exception as err:
-            response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-
+            response_data = json.dumps(
+                {"status": str(err) + ' not correct'}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Определяем дату конца ротации
         try:
-            end_rotate = datetime.datetime.strptime(_data['end_rotate'], "%Y-%m-%d %H:%M:%S")
+            end_rotate = datetime.datetime.strptime(
+                _data['end_rotate'],
+                "%Y-%m-%d %H:%M:%S"
+            )
         except Exception as err:
-            response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        
+            response_data = json.dumps(
+                {"status": str(err) + ' not correct'}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Получаем минимальный скорринговый бал.
         try:
             min_scoring = _data['min_scoring']
         except Exception as err:
-            response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        
+            response_data = json.dumps(
+                {"status": str(err) + ' not correct'}
+            )
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Получаем максимальный скоринговый бал.
         try:
             max_scoring = _data['max_scoring']
         except Exception as err:
             response_data = json.dumps({"status": str(err) + ' not correct'})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
-        
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
         # Формируем предложение.
         try:
             name = str(uuid.uuid4())
             _predlogenie = Predlogenie.objects.create(
                 start_rotate=start_rotate,
                 end_rotate=end_rotate,
-                name = name,
+                name=name,
                 type_of=type_of,
                 min_scoring=min_scoring,
                 max_scoring=max_scoring,
                 credit_org=credit_org
             )
-            
             # Формируем заявку на основании предложения.
             ZayavkiCreditOrg.objects.create(
                 client_anketa=_client_anketa,
                 predlogenie=_predlogenie,
                 status='NEW'
             )
-            
-            return JsonResponse({"status": "created"}, status=status.HTTP_201_CREATED)
-        
+            return JsonResponse(
+                {"status": "created"},
+                status=status.HTTP_201_CREATED
+            )
         except Exception as err:
             response_data = json.dumps({"status": str(err)})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)        
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PartnerViewZayavka(APIView):
@@ -279,6 +355,7 @@ class PartnerViewZayavka(APIView):
     """
     authentication_classes = (TokenAuthentication, )
     permission_classes = (IsAuthenticated, GroupPartnerPermisions)
+
     def post(self, request):
         _filter = request.data
         try:
@@ -287,13 +364,19 @@ class PartnerViewZayavka(APIView):
                 client_anketa__partner=partner,
                 **_filter
             ).order_by('id')
-                
             response_data = serializers.serialize('json', qs)
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
-        
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_200_OK
+            )
         except Exception as err:
             response_data = json.dumps({"status": str(err)})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)          
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PartnerSendZayavka(APIView):
@@ -310,19 +393,36 @@ class PartnerSendZayavka(APIView):
 
             try:
                 partner = Partner.objects.get(username=request.user)
-                ZayavkiCreditOrg.objects.get(client_anketa__partner=partner, id=request.data['id'])
-                task_id = send_request_credit_org.delay(json.dumps({"id": request.data['id']}))
+                ZayavkiCreditOrg.objects.get(
+                    client_anketa__partner=partner,
+                    id=request.data['id']
+                )
+                task_id = send_request_credit_org.delay(
+                    json.dumps({"id": request.data['id']})
+                )
                 response_data = json.dumps({"status": "Zayavka sended"})
-                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_200_OK)
+                return HttpResponse(
+                    response_data,
+                    content_type='application/json',
+                    status=status.HTTP_200_OK
+                )
 
             except ZayavkiCreditOrg.DoesNotExist as err:
                 response_data = json.dumps({"status": str(err)})
-                return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+                return HttpResponse(
+                    response_data,
+                    content_type='application/json',
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         else:
 
             response_data = json.dumps({"status": "id not presented"})
-            return HttpResponse(response_data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponse(
+                response_data,
+                content_type='application/json',
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class CreditOrgView(APIView):
@@ -331,20 +431,27 @@ class CreditOrgView(APIView):
     """
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, GroupCreditPermisions )
+    permission_classes = (IsAuthenticated, GroupCreditPermisions,)
 
     def post(self, request):
         _filter = request.data
         try:
             credit_org = CreditOrg.objects.get(username=request.user)
-            # Исключаем все заявки со статусом "NEW" потому что предполагаем что
-            # Сначала партнеры должны их отправить. После этого у заявок меняется статус на
+            # Исключаем все заявки со статусом "NEW" потому что
+            # предполагаем что Сначала партнеры должны их отправить.
+            #  После этого у заявок меняется статус на
             # Отправленно "SENDED"
-            qs = ZayavkiCreditOrg.objects.filter(predlogenie__credit_org=credit_org).exclude(status='NEW')
+            qs = ZayavkiCreditOrg.objects.filter(
+                predlogenie__credit_org=credit_org
+            ).exclude(status='NEW')
             response_data = serializers.serialize('json', qs)
         except FieldError:
-            response_data = json.dumps({"status": "не корректный запрос"})
-        return HttpResponse(response_data, content_type='application/json')
+            response_data = json.dumps(
+                {"status": "не корректный запрос"}
+            )
+        return HttpResponse(
+            response_data, content_type='application/json'
+        )
 
 
 class CreditOrgUpdateStatus(APIView):
@@ -352,20 +459,16 @@ class CreditOrgUpdateStatus(APIView):
         Предоставление возможности кредитным организациям обновлять статус
         заявки отправленной только в эту кредитную организацию.
         Формат:
-            
             {"id": "6", "status":"ACCEPT"}
-            
         Варианты статусов:
-        
             'ACCEPT'
             'AGREE'
             'CANCELED'
             'ISSUED'
-        
     """
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated, GroupCreditPermisions )
+    permission_classes = (IsAuthenticated, GroupCreditPermisions,)
 
     def post(self, request):
         """
@@ -384,16 +487,28 @@ class CreditOrgUpdateStatus(APIView):
                 )
                 zayavka.status = zayavka_status
                 zayavka.save()
-                return JsonResponse({"status": "status updated"}, status=status.HTTP_200_OK)
+                return JsonResponse(
+                    {"status": "status updated"},
+                    status=status.HTTP_200_OK
+                )
 
             except Exception as err:
-                return JsonResponse({ "status": str(err) }, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse(
+                    {"status": str(err)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             except ZayavkiCreditOrg.DoesNotExist as err:
-                return JsonResponse({ "status": str(err) },  status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse(
+                    {"status": str(err)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         else:
-            return JsonResponse({"status": "params not presented"}, status=status.HTTP_400_BAD_REQUEST)
-    
+            return JsonResponse(
+                {"status": "params not presented"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 class Obtain_auth_token(APIView):
 
@@ -414,10 +529,16 @@ class Obtain_auth_token(APIView):
                     token = Token.objects.create(user=u)
                 else:
                     token = Token.objects.get(user=u)
-                result = json.dumps({"token": token.key })
+                result = json.dumps({"token": token.key})
                 return HttpResponse(result, content_type='application/json')
             else:
-                return HttpResponse(status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
+                return HttpResponse(
+                    status=status.HTTP_401_UNAUTHORIZED,
+                    content_type='application/json'
+                )
 
         except Exception as err:
-            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED, content_type='application/json')
+            return HttpResponse(
+                status=status.HTTP_401_UNAUTHORIZED,
+                content_type='application/json'
+            )

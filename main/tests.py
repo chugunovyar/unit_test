@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test import Client
 
+
 class TestMainPage(TestCase):
     """
         Тестирование главной страницы.

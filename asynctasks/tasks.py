@@ -5,9 +5,11 @@ from api.send_zayavka import SendZayavkaToCreditOrg
 from api.models import ZayavkiCreditOrg
 import json
 
+
 @app.task
 def test(n):
     return n ** 2
+
 
 @app.task
 def send_request_credit_org(zayavka_id):
@@ -16,8 +18,7 @@ def send_request_credit_org(zayavka_id):
     :param anketa:
     :return:
     """
-    if zayavka_id != None:
-
+    if zayavka_id is not None:
         zayavka_id = json.loads(zayavka_id)
         try:
             zayavka = ZayavkiCreditOrg.objects.get(
@@ -34,7 +35,7 @@ def send_request_credit_org(zayavka_id):
             print (z.status)
 
         except ZayavkiCreditOrg.DoesNotExist as err:
-                raise  err
+                raise err
 
         except Exception as err:
             raise err

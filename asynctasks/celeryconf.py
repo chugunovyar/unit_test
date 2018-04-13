@@ -6,12 +6,17 @@ from django.conf import settings
 user = os.environ.get('RABBIT_USER', 'rabbitmq')
 password = os.environ.get('RABBIT_PASSWORD', 'rabbitmq')
 host = os.environ.get('RABBIT_HOST', 'rabbit')
-port = os.environ.get('RABBIT_PORT','5672')
+port = os.environ.get('RABBIT_PORT', '5672')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "unit_test.settings")
 
-app = Celery('datanrm', backend='amqp', \
-             broker='amqp://' + user + ':' + password + '@'+ host +':'+ port +'//')
+app = Celery(
+    'datanrm',
+    backend='amqp',
+    broker='amqp://' + user + ': ' +
+           password + '@' + host + ': ' +
+           port + '//'
+)
 
 app.conf.task_default_queues = 'default'
 
@@ -20,7 +25,7 @@ app.conf.task_queues = (
 )
 
 app.conf.task_routes = {
-    'asynctasks.tasks.*':{'queue':'default'},
+    'asynctasks.tasks.*': {'queue': 'default'},
 }
 
 app.config_from_object('django.conf:settings')

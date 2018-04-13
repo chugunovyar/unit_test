@@ -14,7 +14,7 @@ class SendZayavkaToCreditOrg(object):
             Инициализируем начальные переменные.
         :param zayavka_id:
         """
-        print('inside class ', ' ',zayavka_id)
+        print('inside class ', ' ', zayavka_id)
         self.zayavka_id = json.loads(zayavka_id)
         print (self.zayavka_id)
         try:
@@ -27,16 +27,3 @@ class SendZayavkaToCreditOrg(object):
 
         except Exception as err:
             raise err
-
-    # def query(self):
-    #     """
-    #         Предполагается что кредитная организация проставляет статус.
-    #         На самом деле проставляем статус рандомно, выбирая его из списка статусов.
-    #     :return:
-    #     """
-    #     r_choise = ['ACCEPT', 'AGREE', 'CANCELED', 'ISSUED']
-    #     status = random.choice(r_choise)
-    #     # Предполагаем что банк рассмотрел заявку и проставляем рандомно статус у заявки.
-    #     self.zayavka.status = status
-    #     self.zayavka.save()
-    #     return True
