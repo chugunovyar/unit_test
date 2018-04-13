@@ -32,8 +32,6 @@ def send_request_credit_org(zayavka_id):
                 **zayavka_id
             )
 
-            print (z.status)
-
         except ZayavkiCreditOrg.DoesNotExist as err:
                 raise err
 

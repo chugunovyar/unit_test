@@ -14,9 +14,7 @@ class SendZayavkaToCreditOrg(object):
             Инициализируем начальные переменные.
         :param zayavka_id:
         """
-        print('inside class ', ' ', zayavka_id)
         self.zayavka_id = json.loads(zayavka_id)
-        print (self.zayavka_id)
         try:
             self.zayavka = ZayavkiCreditOrg.objects.get(
                 **self.zayavka_id
